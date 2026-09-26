@@ -1,0 +1,616 @@
+ <!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta
+    name="theme-color"
+    content="#7c1025"
+  >
+
+  <meta
+    name="description"
+    content="Color Clash Party เกมการ์ดสำหรับเล่นบนมือถือและคอมพิวเตอร์"
+  >
+
+  <!-- PWA -->
+  <link rel="manifest" href="./manifest.json">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="./style.css">
+
+  <!-- Mobile -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta
+    name="apple-mobile-web-app-status-bar-style"
+    content="black-translucent"
+  >
+  <meta
+    name="apple-mobile-web-app-title"
+    content="Color Clash"
+  >
+
+  <title>Color Clash Party</title>
+</head>
+
+<body>
+
+  <!-- =========================
+       หน้าเมนู
+  ========================== -->
+
+  <section id="menuScreen" class="screen active">
+
+    <div class="menu-card">
+
+      <div class="logo">
+        <div class="logo-card red">7</div>
+        <div class="logo-card blue">★</div>
+        <div class="logo-card yellow">+</div>
+        <div class="logo-card green">●</div>
+      </div>
+
+      <h1>COLOR CLASH</h1>
+
+      <p class="subtitle">
+        PARTY CARD GAME
+      </p>
+
+      <div class="name-box">
+
+        <label for="playerName">
+          ชื่อผู้เล่น
+        </label>
+
+        <input
+          id="playerName"
+          type="text"
+          maxlength="15"
+          placeholder="ใส่ชื่อของคุณ"
+          autocomplete="off"
+        >
+
+      </div>
+
+      <button
+        id="startButton"
+        class="main-button"
+        type="button"
+      >
+        ▶ เริ่มเกม
+      </button>
+
+      <button
+        id="howButton"
+        class="secondary-button"
+        type="button"
+      >
+        ❔ วิธีการเล่น
+      </button>
+
+      <div class="menu-info">
+
+        <span>👤 ผู้เล่น 1</span>
+        <span>🤖 บอท 3 คน</span>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       วิธีการเล่น
+  ========================== -->
+
+  <section id="howScreen" class="screen">
+
+    <div class="info-card">
+
+      <button
+        id="backMenuButton"
+        class="back-button"
+        type="button"
+      >
+        ← กลับ
+      </button>
+
+      <h2>📖 วิธีการเล่น</h2>
+
+      <div class="rule">
+
+        <div class="rule-icon">🎴</div>
+
+        <div>
+          <h3>ลงการ์ด</h3>
+
+          <p>
+            ลงการ์ดที่มีสีเดียวกัน
+            หรือตัวเลขหรือสัญลักษณ์
+            ตรงกับการ์ดกลาง
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="rule">
+
+        <div class="rule-icon">🌈</div>
+
+        <div>
+          <h3>การ์ด Wild</h3>
+
+          <p>
+            ใช้การ์ด Wild เพื่อเลือกสี
+            สำหรับการเล่นรอบต่อไป
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="rule">
+
+        <div class="rule-icon">➕</div>
+
+        <div>
+          <h3>การ์ดพิเศษ</h3>
+
+          <p>
+            ใช้การ์ด Skip, Reverse
+            และการ์ดเพิ่มจำนวน
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="rule">
+
+        <div class="rule-icon">🏆</div>
+
+        <div>
+          <h3>เป้าหมาย</h3>
+
+          <p>
+            กำจัดการ์ดในมือให้หมด
+            ก่อนผู้เล่นคนอื่น
+          </p>
+        </div>
+
+      </div>
+
+
+      <button
+        id="howStartButton"
+        class="main-button"
+        type="button"
+      >
+        ▶ เล่นเลย
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       หน้าเกม
+  ========================== -->
+
+  <section id="gameScreen" class="screen">
+
+    <!-- Header -->
+
+    <header class="game-header">
+
+      <div class="game-title">
+
+        <strong>
+          COLOR CLASH
+        </strong>
+
+        <small>
+          PARTY
+        </small>
+
+      </div>
+
+
+      <div class="header-buttons">
+
+        <button
+          id="restartButton"
+          type="button"
+          title="เริ่มเกมใหม่"
+        >
+          ↻
+        </button>
+
+        <button
+          id="menuButton"
+          type="button"
+          title="กลับเมนู"
+        >
+          ☰
+        </button>
+
+      </div>
+
+    </header>
+
+
+    <!-- คะแนน -->
+
+    <div class="score-board">
+
+      <div class="score-item">
+        <span>👤</span>
+        <strong id="playerScore">0</strong>
+        <small id="playerLabel">คุณ</small>
+      </div>
+
+      <div class="score-item">
+        <span>🤖</span>
+        <strong id="bot1Score">0</strong>
+        <small>Nova</small>
+      </div>
+
+      <div class="score-item">
+        <span>🤖</span>
+        <strong id="bot2Score">0</strong>
+        <small>Max</small>
+      </div>
+
+      <div class="score-item">
+        <span>🤖</span>
+        <strong id="bot3Score">0</strong>
+        <small>Luna</small>
+      </div>
+
+    </div>
+
+
+    <!-- คู่แข่ง -->
+
+    <div class="opponents">
+
+      <div class="opponent">
+
+        <div class="avatar">
+          🤖
+        </div>
+
+        <div>
+          <strong>Nova</strong>
+          <span id="bot1Cards">7 ใบ</span>
+        </div>
+
+      </div>
+
+
+      <div class="opponent">
+
+        <div class="avatar">
+          🤖
+        </div>
+
+        <div>
+          <strong>Max</strong>
+          <span id="bot2Cards">7 ใบ</span>
+        </div>
+
+      </div>
+
+
+      <div class="opponent">
+
+        <div class="avatar">
+          🤖
+        </div>
+
+        <div>
+          <strong>Luna</strong>
+          <span id="bot3Cards">7 ใบ</span>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ข้อความสถานะ -->
+
+    <div
+      id="gameMessage"
+      class="game-message"
+    >
+      เกมกำลังเตรียมตัว...
+    </div>
+
+
+    <!-- โต๊ะเกม -->
+
+    <main class="game-table">
+
+      <!-- กองจั่ว -->
+
+      <div class="deck-area">
+
+        <div
+          id="drawPile"
+          class="card back-card"
+          title="จั่วการ์ด"
+        >
+
+          <span>
+            CC
+          </span>
+
+        </div>
+
+        <small>
+          จั่ว
+        </small>
+
+      </div>
+
+
+      <!-- การ์ดกลาง -->
+
+      <div class="center-area">
+
+        <div
+          id="discardPile"
+          class="card center-card"
+        >
+        </div>
+
+        <div
+          id="currentColor"
+          class="current-color"
+        >
+          สีปัจจุบัน:
+          <span>—</span>
+        </div>
+
+      </div>
+
+
+      <!-- จำนวนการ์ด -->
+
+      <div class="deck-area">
+
+        <div class="mini-info">
+
+          <strong id="deckCount">
+            0
+          </strong>
+
+          <span>
+            การ์ด
+          </span>
+
+        </div>
+
+      </div>
+
+    </main>
+
+
+    <!-- ผู้เล่น -->
+
+    <div class="player-area">
+
+      <div class="player-top">
+
+        <div>
+
+          <strong id="playerNameDisplay">
+            คุณ
+          </strong>
+
+          <span id="turnStatus">
+            ถึงตาคุณ
+          </span>
+
+        </div>
+
+
+        <button
+          id="unoButton"
+          class="uno-button"
+          type="button"
+        >
+          UNO!
+        </button>
+
+      </div>
+
+
+      <!-- ไพ่ในมือ -->
+
+      <div
+        id="playerHand"
+        class="player-hand"
+      >
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       เลือกสี
+  ========================== -->
+
+  <div
+    id="colorModal"
+    class="modal hidden"
+  >
+
+    <div class="modal-card">
+
+      <h2>
+        🌈 เลือกสี
+      </h2>
+
+      <p>
+        เลือกสีสำหรับการเล่นต่อ
+      </p>
+
+      <div class="color-buttons">
+
+        <button
+          class="color-choice red-choice"
+          data-color="red"
+          type="button"
+        >
+          แดง
+        </button>
+
+        <button
+          class="color-choice blue-choice"
+          data-color="blue"
+          type="button"
+        >
+          น้ำเงิน
+        </button>
+
+        <button
+          class="color-choice yellow-choice"
+          data-color="yellow"
+          type="button"
+        >
+          เหลือง
+        </button>
+
+        <button
+          class="color-choice green-choice"
+          data-color="green"
+          type="button"
+        >
+          เขียว
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================
+       ผลการแข่งขัน
+  ========================== -->
+
+  <div
+    id="resultModal"
+    class="modal hidden"
+  >
+
+    <div class="modal-card result-card">
+
+      <div
+        id="resultIcon"
+        class="result-icon"
+      >
+        🏆
+      </div>
+
+      <h2 id="resultTitle">
+        จบเกม!
+      </h2>
+
+      <p id="resultText">
+        ผลการแข่งขัน
+      </p>
+
+      <div class="result-score">
+
+        <span>
+          คะแนน
+        </span>
+
+        <strong id="finalScore">
+          0
+        </strong>
+
+      </div>
+
+
+      <button
+        id="playAgainButton"
+        class="main-button"
+        type="button"
+      >
+        🔄 เล่นอีกครั้ง
+      </button>
+
+
+      <button
+        id="resultMenuButton"
+        class="secondary-button"
+        type="button"
+      >
+        🏠 กลับเมนู
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================
+       GAME JAVASCRIPT
+  ========================== -->
+
+  <script src="./game.js"></script>
+
+
+  <!-- =========================
+       SERVICE WORKER
+  ========================== -->
+
+  <script>
+
+    if ("serviceWorker" in navigator) {
+
+      window.addEventListener("load", function () {
+
+        navigator.serviceWorker
+          .register("./sw.js")
+          .then(function (registration) {
+
+            console.log(
+              "Color Clash PWA Ready:",
+              registration.scope
+            );
+
+          })
+          .catch(function (error) {
+
+            console.error(
+              "Service Worker Error:",
+              error
+            );
+
+          });
+
+      });
+
+    }
+
+  </script>
+
+</body>
+</html>
