@@ -1,0 +1,26 @@
+{
+  "name": "Color Clash Party",
+  "short_name": "Color Clash",
+  "description": "เกมการ์ด Color Clash Party",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#21040c",
+  "theme_color": "#7c1025",
+  "orientation": "portrait",
+  "lang": "th",
+  "icons": [
+    {
+      "src": "./android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
