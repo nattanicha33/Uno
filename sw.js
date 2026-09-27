@@ -6,8 +6,8 @@ const FILES_TO_CACHE = [
   "./style.css",
   "./game.js",
   "./manifest.json",
-  "./android-chrome-192x192.png",
-  "./android-chrome-512x512.png"
+  "./icon-192.png",
+  "./icon-512.png"
 ];
 
 self.addEventListener("install", event => {
