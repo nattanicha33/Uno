@@ -61,9 +61,77 @@ const sfx = {
   draw: () => beep(300, 0.15, "sawtooth", 0.1),
   myTurn: () => { beep(660, 0.1); beep(880, 0.15, "sine", 0.2, 0.1); },
   uno: () => { beep(880, 0.1, "square", 0.12); beep(1100, 0.2, "square", 0.12, 0.12); },
-  win: () => [523, 659, 784, 1047].forEach((f, i) => beep(f, 0.18, "triangle", 0.2, i * 0.14)),
-  lose: () => [400, 330, 262].forEach((f, i) => beep(f, 0.22, "triangle", 0.18, i * 0.18))
+  win: () => [523, 659, 784, 1047].forEach((f, i) => beep(f, 0.18, "triangle", 0.2, i * 0.14))
 };
+
+/* ---------- winner celebration: pop sound + confetti + trophy ---------- */
+
+function popSound(delay = 0, pitch = 1) {
+  if (!state.sound) return;
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === "suspended") audioCtx.resume();
+    const t = audioCtx.currentTime + delay;
+    const len = Math.floor(audioCtx.sampleRate * 0.25);
+    const buf = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = buf;
+    const g = audioCtx.createGain();
+    g.gain.value = 0.35;
+    noise.connect(g);
+    g.connect(audioCtx.destination);
+    noise.start(t);
+    beep(900 * pitch, 0.18, "sine", 0.18, delay);
+    beep(450 * pitch, 0.25, "sine", 0.12, delay + 0.03);
+  } catch (e) {}
+}
+
+function celebrate() {
+  sfx.win();
+  [0, 0.25, 0.5, 0.8, 1.1].forEach((d, i) => popSound(d, 0.9 + (i % 3) * 0.15));
+
+  if (!document.getElementById("celebrateStyle")) {
+    const st = document.createElement("style");
+    st.id = "celebrateStyle";
+    st.textContent = `
+      @keyframes ccFall { 0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+                          100% { transform: translateY(105vh) rotate(720deg); opacity: 0.9; } }
+      @keyframes ccTrophy { 0% { transform: scale(0.2) rotate(-20deg); opacity: 0; }
+                            60% { transform: scale(1.4) rotate(8deg); opacity: 1; }
+                            100% { transform: scale(1) rotate(0deg); opacity: 1; } }
+      @keyframes ccShine { 0%,100% { filter: drop-shadow(0 0 6px gold); }
+                           50% { filter: drop-shadow(0 0 22px gold); } }
+      #resultIcon { display: inline-block; animation: ccTrophy 0.7s ease-out, ccShine 1.4s ease-in-out 0.7s infinite; }
+      .cc-confetti { position: fixed; top: 0; width: 10px; height: 14px; z-index: 99999;
+                     pointer-events: none; animation: ccFall linear forwards; }
+    `;
+    document.head.appendChild(st);
+  }
+
+  const icon = $("#resultIcon");
+  if (icon) {
+    icon.style.animation = "none";
+    void icon.offsetWidth;
+    icon.style.animation = "";
+  }
+
+  const colors = ["#e52335", "#f4cf22", "#28a64a", "#2477df", "#ff7ac8", "#ffffff"];
+  const pieces = [];
+  for (let i = 0; i < 70; i++) {
+    const c = document.createElement("div");
+    c.className = "cc-confetti";
+    c.style.left = Math.random() * 100 + "vw";
+    c.style.background = colors[i % colors.length];
+    c.style.animationDuration = 2 + Math.random() * 2 + "s";
+    c.style.animationDelay = Math.random() * 0.8 + "s";
+    c.style.borderRadius = i % 3 === 0 ? "50%" : "2px";
+    document.body.appendChild(c);
+    pieces.push(c);
+  }
+  setTimeout(() => pieces.forEach((p) => p.remove()), 4800);
+}
 
 /* ---------- deck ---------- */
 
@@ -284,9 +352,7 @@ function endRound(winnerIndex) {
   state.busy = true;
   render();
 
-  if (winner.human) sfx.win(); else sfx.lose();
-
-  $("#resultIcon").textContent = winner.human ? "🏆" : "🤖";
+  $("#resultIcon").textContent = "🏆";
   $("#resultTitle").textContent = winner.human ? "คุณชนะ!" : "รอบนี้ " + winner.name + " ชนะ";
   $("#resultText").textContent = winner.human
     ? `เก็บคะแนนเพิ่ม ${points} คะแนน`
@@ -295,7 +361,10 @@ function endRound(winnerIndex) {
 
   if (winner.human) localStorage.setItem("cc_score", state.players[0].score);
 
-  setTimeout(() => $("#resultModal").classList.remove("hidden"), 400);
+  setTimeout(() => {
+    $("#resultModal").classList.remove("hidden");
+    celebrate();
+  }, 400);
 }
 
 /* ---------- rendering ---------- */
