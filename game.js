@@ -64,6 +64,73 @@ const sfx = {
   win: () => [523, 659, 784, 1047].forEach((f, i) => beep(f, 0.18, "triangle", 0.2, i * 0.14))
 };
 
+/* ---------- unlock audio on first touch (mobile browsers) ---------- */
+
+function unlockAudio() {
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === "suspended") audioCtx.resume();
+  } catch (e) {}
+}
+["click", "touchstart", "keydown"].forEach((ev) =>
+  document.addEventListener(ev, unlockAudio, { passive: true })
+);
+
+/* ---------- crowd cheer "เฮ!" ---------- */
+
+function cheerSound(delay = 0) {
+  if (!state.sound) return;
+  try {
+    unlockAudio();
+    const t = audioCtx.currentTime + delay;
+    const dur = 2.2;
+
+    // crowd noise
+    const len = Math.floor(audioCtx.sampleRate * dur);
+    const buf = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = buf;
+    const bp = audioCtx.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.frequency.value = 1400;
+    bp.Q.value = 0.7;
+    const ng = audioCtx.createGain();
+    ng.gain.setValueAtTime(0.0001, t);
+    ng.gain.exponentialRampToValueAtTime(0.5, t + 0.35);
+    ng.gain.setValueAtTime(0.4, t + 1.2);
+    ng.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    noise.connect(bp);
+    bp.connect(ng);
+    ng.connect(audioCtx.destination);
+    noise.start(t);
+    noise.stop(t + dur);
+
+    // voices "aaah"
+    [196, 247, 294, 392].forEach((f) => {
+      const o = audioCtx.createOscillator();
+      o.type = "sawtooth";
+      o.frequency.setValueAtTime(f * 0.9, t);
+      o.frequency.linearRampToValueAtTime(f * 1.12, t + 0.5);
+      const vf = audioCtx.createBiquadFilter();
+      vf.type = "bandpass";
+      vf.frequency.value = 800;
+      vf.Q.value = 2;
+      const vg = audioCtx.createGain();
+      vg.gain.setValueAtTime(0.0001, t);
+      vg.gain.exponentialRampToValueAtTime(0.22, t + 0.3);
+      vg.gain.setValueAtTime(0.18, t + 1.1);
+      vg.gain.exponentialRampToValueAtTime(0.0001, t + dur - 0.2);
+      o.connect(vf);
+      vf.connect(vg);
+      vg.connect(audioCtx.destination);
+      o.start(t);
+      o.stop(t + dur);
+    });
+  } catch (e) {}
+}
+
 /* ---------- winner celebration: pop sound + confetti + trophy ---------- */
 
 function popSound(delay = 0, pitch = 1) {
@@ -79,17 +146,18 @@ function popSound(delay = 0, pitch = 1) {
     const noise = audioCtx.createBufferSource();
     noise.buffer = buf;
     const g = audioCtx.createGain();
-    g.gain.value = 0.35;
+    g.gain.value = 0.6;
     noise.connect(g);
     g.connect(audioCtx.destination);
     noise.start(t);
-    beep(900 * pitch, 0.18, "sine", 0.18, delay);
-    beep(450 * pitch, 0.25, "sine", 0.12, delay + 0.03);
+    beep(900 * pitch, 0.18, "sine", 0.3, delay);
+    beep(450 * pitch, 0.25, "sine", 0.22, delay + 0.03);
   } catch (e) {}
 }
 
 function celebrate() {
   sfx.win();
+  cheerSound(0.1);
   [0, 0.25, 0.5, 0.8, 1.1].forEach((d, i) => popSound(d, 0.9 + (i % 3) * 0.15));
 
   if (!document.getElementById("celebrateStyle")) {
