@@ -1,4 +1,4 @@
-const CACHE_NAME = "color-clash-party-v3";
+const CACHE_NAME = "color-clash-party-v4";
 
 const FILES_TO_CACHE = [
   "./",
