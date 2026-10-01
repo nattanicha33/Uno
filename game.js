@@ -33,6 +33,38 @@ function showScreen(id) {
   SCREENS.forEach((x) => $("#" + x).classList.toggle("active", x === id));
 }
 
+/* ---------- sound effects (Web Audio, no files needed) ---------- */
+
+let audioCtx = null;
+function beep(freq, dur = 0.12, type = "sine", vol = 0.2, delay = 0) {
+  if (!state.sound) return;
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === "suspended") audioCtx.resume();
+    const t = audioCtx.currentTime + delay;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(t);
+    osc.stop(t + dur);
+  } catch (e) {}
+}
+
+const sfx = {
+  play: () => { beep(520, 0.08, "triangle"); beep(780, 0.1, "triangle", 0.2, 0.06); },
+  botPlay: () => beep(400, 0.08, "triangle", 0.12),
+  draw: () => beep(300, 0.15, "sawtooth", 0.1),
+  myTurn: () => { beep(660, 0.1); beep(880, 0.15, "sine", 0.2, 0.1); },
+  uno: () => { beep(880, 0.1, "square", 0.12); beep(1100, 0.2, "square", 0.12, 0.12); },
+  win: () => [523, 659, 784, 1047].forEach((f, i) => beep(f, 0.18, "triangle", 0.2, i * 0.14)),
+  lose: () => [400, 330, 262].forEach((f, i) => beep(f, 0.22, "triangle", 0.18, i * 0.18))
+};
+
 /* ---------- deck ---------- */
 
 function makeDeck() {
@@ -133,6 +165,7 @@ function dispatchTurn() {
     setTimeout(botTurn, 650);
   } else {
     state.busy = false;
+    sfx.myTurn();
     setMessage("ถึงตาคุณ — เลือกการ์ดที่ลงได้");
   }
 }
@@ -146,6 +179,7 @@ function playCard(playerIndex, cardIndex, chosenColor = null) {
 
   p.hand.splice(cardIndex, 1);
   state.discard.push(c);
+  if (p.human) sfx.play(); else sfx.botPlay();
 
   if (c.color !== "wild") state.currentColor = c.color;
   if (chosenColor) state.currentColor = chosenColor;
@@ -178,6 +212,7 @@ function drawFor(playerIndex) {
   const p = state.players[playerIndex];
   const amount = state.pendingDraw > 0 ? state.pendingDraw : 1;
   for (let i = 0; i < amount; i++) p.hand.push(drawOne());
+  sfx.draw();
   state.pendingDraw = 0;
   render();
   if (playerIndex === state.turn) nextTurn();
@@ -248,6 +283,8 @@ function endRound(winnerIndex) {
   winner.score += points;
   state.busy = true;
   render();
+
+  if (winner.human) sfx.win(); else sfx.lose();
 
   $("#resultIcon").textContent = winner.human ? "🏆" : "🤖";
   $("#resultTitle").textContent = winner.human ? "คุณชนะ!" : "รอบนี้ " + winner.name + " ชนะ";
@@ -363,6 +400,7 @@ $("#drawPile").addEventListener("click", () => {
 $("#unoButton").addEventListener("click", () => {
   if (state.players[0].hand.length === 1) {
     state.unoCalled = true;
+    sfx.uno();
     setMessage("คุณกด UNO! แล้ว");
   } else {
     setMessage("กด UNO! ได้ตอนเหลือการ์ดใบเดียวเท่านั้น");
@@ -418,4 +456,3 @@ $("#resultMenuButton").addEventListener("click", () => {
   $("#resultModal").classList.add("hidden");
   showScreen("menuScreen");
 });
-
